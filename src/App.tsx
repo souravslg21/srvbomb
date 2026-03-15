@@ -4,7 +4,7 @@ import { Phone, Zap, Shield, Bomb, Activity, Terminal } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
-const API_BASE = window.location.origin === 'http://localhost:5173' ? 'http://localhost:8000' : '/api';
+const API_BASE = '/api';
 
 function App() {
   const [phone, setPhone] = useState('');

@@ -124,13 +124,13 @@ async def send_bomb(phone: str, count: int, bomb_id: str):
 
     bombing_status[bomb_id]["status"] = "completed"
 
-@app.post("/bomb")
+@app.post("/api/bomb")
 async def start_bombing(request: BombRequest, background_tasks: BackgroundTasks):
     bomb_id = f"bomb_{random.randint(1000, 9999)}_{int(asyncio.get_event_loop().time())}"
     background_tasks.add_task(send_bomb, request.phone, request.count, bomb_id)
     return {"bomb_id": bomb_id, "message": "Bombing started"}
 
-@app.get("/status/{bomb_id}")
+@app.get("/api/status/{bomb_id}")
 async def get_status(bomb_id: str):
     return bombing_status.get(bomb_id, {"status": "not_found"})
 
