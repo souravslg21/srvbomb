@@ -9,8 +9,6 @@ const API_BASE = '/api';
 function App() {
   const [phone, setPhone] = useState('');
   const [count, setCount] = useState(50);
-  const [contacts, setContacts] = useState<{name: string, phone: string}[]>([]);
-  const [showContacts, setShowContacts] = useState(false);
   const [status, setStatus] = useState<any>({
     status: 'idle',
     sent: 0,
@@ -20,27 +18,6 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [isStopping, setIsStopping] = useState(false);
   const [mode, setMode] = useState<'sms' | 'call'>('sms');
-
-  // Load contacts from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('srv_contacts');
-    if (saved) setContacts(JSON.parse(saved));
-  }, []);
-
-  const saveContact = () => {
-    if (phone.length === 10) {
-      const name = prompt("Enter name for this contact:") || `Contact ${contacts.length + 1}`;
-      const newContacts = [...contacts, { name, phone }];
-      setContacts(newContacts);
-      localStorage.setItem('srv_contacts', JSON.stringify(newContacts));
-    }
-  };
-
-  const deleteContact = (idx: number) => {
-    const newContacts = contacts.filter((_, i) => i !== idx);
-    setContacts(newContacts);
-    localStorage.setItem('srv_contacts', JSON.stringify(newContacts));
-  };
 
   const importFromPhonebook = async () => {
     try {
@@ -60,7 +37,6 @@ function App() {
         const tenDigit = raw.slice(-10);
         if (tenDigit.length === 10) {
           setPhone(tenDigit);
-          setShowContacts(false);
         } else {
           alert("Could not find a valid 10-digit number in this contact.");
         }
@@ -178,16 +154,7 @@ function App() {
           </div>
 
           <div>
-            <div className="flex justify-between items-center mb-2">
-              <label className="label mb-0">Target Phone Number</label>
-              <button 
-                onClick={() => setShowContacts(true)}
-                className="text-xs text-cyan-400/60 hover:text-cyan-400 flex items-center gap-1 transition-colors"
-              >
-                <Users className="w-3 h-3" />
-                CONTACTS
-              </button>
-            </div>
+            <label className="label">Target Phone Number</label>
             <div className="relative flex gap-2">
               <div className="relative flex-1">
                 <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20" />
@@ -200,12 +167,11 @@ function App() {
                 />
               </div>
               <button 
-                onClick={saveContact}
-                disabled={phone.length < 10}
-                className="p-3 bg-white/5 border border-white/10 rounded-2xl hover:bg-cyan-500/10 hover:border-cyan-500/30 transition-all text-white/40 hover:text-cyan-400 disabled:opacity-30"
-                title="Add to contacts"
+                onClick={importFromPhonebook}
+                className="p-3 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center hover:bg-cyan-500/10 hover:border-cyan-500/30 transition-all text-cyan-400"
+                title="Select from Phonebook"
               >
-                <UserPlus className="w-5 h-5" />
+                <BookOpen className="w-5 h-5" />
               </button>
             </div>
           </div>
@@ -313,82 +279,7 @@ function App() {
         </div>
       </motion.div>
 
-      <AnimatePresence>
-        {showContacts && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setShowContacts(false)}
-          >
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="w-full max-w-md glass-card border border-white/10"
-              onClick={e => e.stopPropagation()}
-            >
-              <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center gap-2">
-                  <Users className="w-5 h-5 text-cyan-400" />
-                  <h2 className="text-xl font-bold">Contact List</h2>
-                </div>
-                <button 
-                  onClick={() => setShowContacts(false)}
-                  className="p-2 text-white/40 hover:text-white transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
 
-              <div className="mb-4">
-                <button 
-                  onClick={importFromPhonebook}
-                  className="w-full p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center gap-3 hover:bg-cyan-500/20 transition-all font-bold text-sm tracking-widest"
-                >
-                  <BookOpen className="w-5 h-5" />
-                  IMPORT FROM PHONEBOOK
-                </button>
-              </div>
-
-              <div className="space-y-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
-                {contacts.length === 0 ? (
-                  <div className="text-center py-12 text-white/20">
-                    <Users className="w-12 h-12 mx-auto mb-4 opacity-10" />
-                    <p>No contacts saved yet</p>
-                  </div>
-                ) : (
-                  contacts.map((c, i) => (
-                    <div 
-                      key={i}
-                      className="group flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-cyan-500/30 transition-all cursor-pointer"
-                      onClick={() => {
-                        setPhone(c.phone);
-                        setShowContacts(false);
-                      }}
-                    >
-                      <div>
-                        <div className="font-medium text-white/80 group-hover:text-cyan-400 transition-colors">{c.name}</div>
-                        <div className="text-sm text-white/40">{c.phone}</div>
-                      </div>
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteContact(i);
-                        }}
-                        className="p-2 text-white/10 hover:text-red-400 transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
