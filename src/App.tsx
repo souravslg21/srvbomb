@@ -50,6 +50,17 @@ function App() {
     }
   };
 
+  const handleStop = async () => {
+    if (!bombId) return;
+    try {
+      await axios.post(`${API_BASE}/stop/${bombId}`);
+    } catch (err) {
+      console.error("Stop error", err);
+    }
+  };
+
+  const progress = status ? Math.min(100, Math.round(((status.sent || 0) / (status.total || 1)) * 100)) : 0;
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <motion.div 
@@ -97,18 +108,26 @@ function App() {
             />
           </div>
 
-          <button 
-            onClick={handleBomb}
-            disabled={loading || !phone || phone.length < 10}
-            className="btn neon-button w-full"
-          >
-            {loading ? (
-              <Activity className="w-5 h-5 animate-spin" />
+          <div className="flex gap-4">
+            {!loading ? (
+              <button 
+                onClick={handleBomb}
+                disabled={!phone || phone.length < 10}
+                className="btn neon-button flex-1"
+              >
+                <Zap className="w-5 h-5 fill-current" />
+                START BOMBING
+              </button>
             ) : (
-              <Zap className="w-5 h-5 fill-current" />
+              <button 
+                onClick={handleStop}
+                className="btn stop-button flex-1"
+              >
+                <Shield className="w-5 h-5" />
+                STOP BOMBING
+              </button>
             )}
-            {loading ? 'INITIATING...' : 'START BOMBING'}
-          </button>
+          </div>
         </div>
 
         <AnimatePresence>
@@ -124,19 +143,23 @@ function App() {
                   <Activity className="w-4 h-4 text-cyan-400" />
                   <span className="text-sm font-medium">Operation Status</span>
                 </div>
-                <span className={`status-badge ${status.status === 'running' ? 'status-running' : 'status-completed'}`}>
+                <span className={`status-badge ${
+                  status.status === 'running' ? 'status-running' : 
+                  status.status === 'completed' ? 'status-completed' : 
+                  'status-stopped'
+                }`}>
                   {status.status}
                 </span>
               </div>
 
               <div className="flex justify-between text-xs text-white/40 mb-1">
-                <span>Progress: {status.sent} / {status.total}</span>
-                <span>{Math.round((status.sent / status.total) * 100)}%</span>
+                <span>Progress: {status.sent || 0} / {status.total || 1}</span>
+                <span>{progress}%</span>
               </div>
               <div className="progress-container">
                 <div 
                   className="progress-bar" 
-                  style={{ width: `${(status.sent / status.total) * 100}%` }}
+                  style={{ width: `${progress}%` }}
                 />
               </div>
 

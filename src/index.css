@@ -41,6 +41,7 @@ body {
 .neon-text {
   background: linear-gradient(90deg, #00f5ff, #8a2be2);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   font-weight: 800;
 }
@@ -128,8 +129,41 @@ body {
 
 .progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, #00f5ff, #8a2be2);
+  background: linear-gradient(90deg, #00f5ff, #8a2be2, #00f5ff);
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
   transition: width 0.5s ease-out;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.stop-button {
+  background: linear-gradient(135deg, #ff4b2b 0%, #ff416c 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 1rem 2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 15px rgba(255, 65, 108, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.stop-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 25px rgba(255, 65, 108, 0.5);
+}
+
+.status-stopped {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
 }
 
 .log-container {
