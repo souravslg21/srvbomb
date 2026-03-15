@@ -134,19 +134,19 @@ function App() {
         </div>
 
         <div className="space-y-6">
-          <div className="flex gap-4 p-1 bg-white/5 rounded-2xl border border-white/10">
+          <div className="flex gap-2 p-1 bg-white/5 rounded-2xl border border-white/10">
             <button 
               onClick={() => setMode('sms')}
               disabled={loading}
-              className={`flex-1 py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all ${mode === 'sms' ? 'bg-cyan-500/20 text-cyan-400 shadow-lg' : 'text-white/40 hover:text-white/60'}`}
+              className={`flex-1 py-3 px-4 rounded-xl flex items-center justify-center gap-2 font-bold tracking-wide transition-all duration-300 ${mode === 'sms' ? 'bg-cyan-500 text-black shadow-[0_0_20px_rgba(6,182,212,0.6)]' : 'bg-transparent text-white/40 hover:text-white hover:bg-white/5'}`}
             >
-              <Zap className="w-4 h-4" />
+              <Zap className={`w-4 h-4 ${mode === 'sms' ? 'fill-current' : ''}`} />
               SMS MODE
             </button>
             <button 
               onClick={() => setMode('call')}
               disabled={loading}
-              className={`flex-1 py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all ${mode === 'call' ? 'bg-purple-500/20 text-purple-400 shadow-lg' : 'text-white/40 hover:text-white/60'}`}
+              className={`flex-1 py-3 px-4 rounded-xl flex items-center justify-center gap-2 font-bold tracking-wide transition-all duration-300 ${mode === 'call' ? 'bg-purple-500 text-black shadow-[0_0_20px_rgba(168,85,247,0.6)]' : 'bg-transparent text-white/40 hover:text-white hover:bg-white/5'}`}
             >
               <Activity className="w-4 h-4" />
               CALL MODE
