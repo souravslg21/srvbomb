@@ -9,57 +9,81 @@ const API_BASE = '/api';
 function App() {
   const [phone, setPhone] = useState('');
   const [count, setCount] = useState(50);
-  const [bombId, setBombId] = useState<string | null>(null);
-  const [status, setStatus] = useState<any>(null);
+  const [status, setStatus] = useState<any>({
+    status: 'idle',
+    sent: 0,
+    total: 0,
+    logs: []
+  });
   const [loading, setLoading] = useState(false);
+  const [isStopping, setIsStopping] = useState(false);
 
-  useEffect(() => {
-    let interval: any;
-    if (bombId && status?.status !== 'completed') {
-      interval = setInterval(async () => {
-        try {
-          const res = await axios.get(`${API_BASE}/status/${bombId}`);
-          setStatus(res.data);
-          if (res.data.status === 'completed') {
-            clearInterval(interval);
-            setLoading(false);
-          }
-        } catch (err) {
-          console.error("Poll error", err);
-        }
-      }, 2000);
-    }
-    return () => clearInterval(interval);
-  }, [bombId, status]);
+  // Reference to track stop signal inside the loop
+  const stopRef = React.useRef(false);
 
   const handleBomb = async () => {
     if (!phone || phone.length < 10) return;
-    setLoading(true);
-    setBombId(null);
-    setStatus(null);
     
-    try {
-      const res = await axios.post(`${API_BASE}/bomb`, {
-        phone: phone,
-        count: count
-      });
-      setBombId(res.data.bomb_id);
-    } catch (err) {
-      alert("Failed to connect to backend. Make sure it's running.");
-      setLoading(false);
+    setLoading(true);
+    setIsStopping(false);
+    stopRef.current = false;
+    
+    setStatus({
+      status: 'running',
+      sent: 0,
+      total: count,
+      logs: ['Initialising system...']
+    });
+
+    let currentSent = 0;
+    
+    for (let i = 0; i < count; i++) {
+      if (stopRef.current) {
+        setStatus((prev: any) => ({
+          ...prev,
+          status: 'stopped',
+          logs: [...prev.logs, 'Operation stopped by user.']
+        }));
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await axios.post(`${API_BASE}/bomb/single`, {
+          phone: phone,
+          count: 1 // not used by backend anymore
+        });
+
+        currentSent++;
+        setStatus((prev: any) => ({
+          ...prev,
+          sent: currentSent,
+          logs: [...prev.logs, res.data.log].slice(-20) // Keep last 20 logs
+        }));
+
+      } catch (err) {
+        setStatus((prev: any) => ({
+          ...prev,
+          logs: [...prev.logs, 'Network error occurred.'].slice(-20)
+        }));
+      }
+
+      // Small delay to be polite
+      if (i < count - 1) {
+        await new Promise(resolve => setTimeout(resolve, 800));
+      }
     }
+
+    setStatus((prev: any) => ({ ...prev, status: 'completed' }));
+    setLoading(false);
   };
 
-  const handleStop = async () => {
-    if (!bombId) return;
-    try {
-      await axios.post(`${API_BASE}/stop/${bombId}`);
-    } catch (err) {
-      console.error("Stop error", err);
-    }
+  const handleStop = () => {
+    setIsStopping(true);
+    stopRef.current = true;
   };
 
-  const progress = status ? Math.min(100, Math.round(((status.sent || 0) / (status.total || 1)) * 100)) : 0;
+  const progress = status.total > 0 ? Math.round((status.sent / status.total) * 100) : 0;
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -121,17 +145,18 @@ function App() {
             ) : (
               <button 
                 onClick={handleStop}
+                disabled={isStopping}
                 className="btn stop-button flex-1"
               >
                 <Shield className="w-5 h-5" />
-                STOP BOMBING
+                {isStopping ? 'STOPPING...' : 'STOP BOMBING'}
               </button>
             )}
           </div>
         </div>
 
         <AnimatePresence>
-          {status && (
+          {status.status !== 'idle' && (
             <motion.div 
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
@@ -153,7 +178,7 @@ function App() {
               </div>
 
               <div className="flex justify-between text-xs text-white/40 mb-1">
-                <span>Progress: {status.sent || 0} / {status.total || 1}</span>
+                <span>Progress: {status.sent} / {status.total}</span>
                 <span>{progress}%</span>
               </div>
               <div className="progress-container">
@@ -169,7 +194,7 @@ function App() {
                     <Terminal className="w-3 h-3" />
                     <span className="text-[10px] uppercase tracking-wider font-bold">Live Proxy Logs</span>
                   </div>
-                  {status.logs.slice(-5).reverse().map((log: string, i: number) => (
+                  {[...status.logs].reverse().slice(0, 5).map((log: string, i: number) => (
                     <div key={i} className="log-entry">
                       <span className="text-cyan-500/30 mr-2">{'>'}</span>
                       {log}
@@ -199,5 +224,4 @@ function App() {
     </div>
   );
 }
-
 export default App;

