@@ -65,7 +65,7 @@ function App() {
           >
             <Bomb className="w-12 h-12 text-cyan-400" />
           </motion.div>
-          <h1 className="text-4xl neon-text mb-2">NEON BOMBER</h1>
+          <h1 className="text-4xl neon-text mb-2">SrV Bomber</h1>
           <p className="text-white/40 text-sm">Automated OTP verification stress testing tool</p>
         </div>
 
