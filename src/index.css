@@ -1,0 +1,149 @@
+
+:root {
+  font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: dark;
+  color: rgba(255, 255, 255, 1);
+  background-color: #0a0a0b;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-content: center;
+  min-width: 320px;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: radial-gradient(circle at 50% 50%, #151520 0%, #0a0a0b 100%);
+}
+
+#root {
+  width: 100%;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 2.5rem;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+}
+
+.neon-text {
+  background: linear-gradient(90deg, #00f5ff, #8a2be2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+}
+
+.neon-button {
+  background: linear-gradient(135deg, #00f5ff 0%, #00d4ff 100%);
+  color: #000;
+  border: none;
+  border-radius: 12px;
+  padding: 1rem 2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 15px rgba(0, 245, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.neon-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 25px rgba(0, 245, 255, 0.5);
+}
+
+.neon-button:disabled {
+  background: #333;
+  color: #666;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.input-field {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  color: white;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #00f5ff;
+}
+
+.label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.status-running {
+  background: rgba(0, 245, 255, 0.1);
+  color: #00f5ff;
+}
+
+.status-completed {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.progress-container {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #00f5ff, #8a2be2);
+  transition: width 0.5s ease-out;
+}
+
+.log-container {
+  margin-top: 1.5rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  padding: 1rem;
+  max-height: 150px;
+  overflow-y: auto;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.log-entry {
+  margin-bottom: 0.25rem;
+}
