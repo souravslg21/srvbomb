@@ -1075,7 +1075,43 @@ apis = [
     "headers": {},
     "data": None,
     "count": 5
+},
+{
+    "url": "https://api-gateway.zigap.ir/api/v1.9/authenticate/sendotp",
+    "method": "POST",
+    "headers": {"Content-Type": "application/json"},
+    "data": lambda phone: json.dumps({"phoneNumber": f"+98{phone[1:]}"}),
+    "count": 5
+},
+{
+    "url": "https://api.mootanroo.com/api/v3/auth/send-otp",
+    "method": "POST",
+    "headers": {"Content-Type": "application/json"},
+    "data": lambda phone: json.dumps({"phoneNumber": phone}),
+    "count": 5
+},
+{
+    "url": "https://www.miare.ir/api/otp/driver/request/",
+    "method": "POST",
+    "headers": {"Content-Type": "application/json"},
+    "data": lambda phone: json.dumps({"phone": phone}),
+    "count": 5
+},
+{
+    "url": "https://api.ostadkr.com/login",
+    "method": "POST",
+    "headers": {"Content-Type": "application/json"},
+    "data": lambda phone: json.dumps({"mobile": phone}),
+    "count": 5
+},
+{
+    "url": "https://api.cafebazaar.ir/rest-v1/process/GetOtpTokenRequest",
+    "method": "POST",
+    "headers": {"Content-Type": "application/json"},
+    "data": lambda phone: json.dumps({"phone": phone}),
+    "count": 5
 }
+]
 
 call_apis = [
     {
@@ -1088,28 +1124,39 @@ call_apis = [
     {
         "url": "https://www.makaan.com/apis/nc/sendOtpOnCall/16257065/{phone}?callType=otpOnCall",
         "method": "GET",
-        "headers": {},
+        "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Referer": "https://www.makaan.com/"
+        },
         "data": None,
         "count": 1
     },
     {
         "url": "https://www.realestateindia.com/mobile-script/indian_mobile_verification_form.php",
         "method": "POST",
-        "headers": {"Content-Type": "application/x-www-form-urlencoded"},
+        "headers": {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        },
         "data": lambda phone: f"action_id=call_to_otp&mob_num={phone}&member_id=1547045",
         "count": 1
     },
     {
         "url": "https://api.magicbricks.com/bricks/verifyOnCall.html?mobile={phone}",
         "method": "GET",
-        "headers": {},
+        "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        },
         "data": None,
         "count": 1
     },
     {
         "url": "https://www.careers360.com/ajax/no-cache/user/otp-send",
         "method": "POST",
-        "headers": {"Content-Type": "application/x-www-form-urlencoded"},
+        "headers": {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        },
         "data": lambda phone: f"mobile_number={phone}&method=call&uid=12692588",
         "count": 1
     },
