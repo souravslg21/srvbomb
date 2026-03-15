@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Phone, Zap, Shield, Bomb, Activity, Terminal, UserPlus, Users, Trash2, X } from 'lucide-react';
+import { Phone, Zap, Shield, Bomb, Activity, Terminal, UserPlus, Users, Trash2, X, BookOpen } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
@@ -40,6 +40,34 @@ function App() {
     const newContacts = contacts.filter((_, i) => i !== idx);
     setContacts(newContacts);
     localStorage.setItem('srv_contacts', JSON.stringify(newContacts));
+  };
+
+  const importFromPhonebook = async () => {
+    try {
+      // @ts-ignore
+      if (!('contacts' in navigator && 'select' in navigator.contacts)) {
+        alert("Mobile Phonebook access is not supported on this browser/device. This works best on Android Chrome via HTTPS.");
+        return;
+      }
+
+      const props = ['name', 'tel'];
+      const opts = { multiple: false };
+      // @ts-ignore
+      const picked = await navigator.contacts.select(props, opts);
+      
+      if (picked.length > 0 && picked[0].tel && picked[0].tel.length > 0) {
+        const raw = picked[0].tel[0].replace(/\D/g, '');
+        const tenDigit = raw.slice(-10);
+        if (tenDigit.length === 10) {
+          setPhone(tenDigit);
+          setShowContacts(false);
+        } else {
+          alert("Could not find a valid 10-digit number in this contact.");
+        }
+      }
+    } catch (err) {
+      console.warn("Phonebook access denied or failed:", err);
+    }
   };
 
   // Reference to track stop signal inside the loop
@@ -314,7 +342,17 @@ function App() {
                 </button>
               </div>
 
-              <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+              <div className="mb-4">
+                <button 
+                  onClick={importFromPhonebook}
+                  className="w-full p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center gap-3 hover:bg-cyan-500/20 transition-all font-bold text-sm tracking-widest"
+                >
+                  <BookOpen className="w-5 h-5" />
+                  IMPORT FROM PHONEBOOK
+                </button>
+              </div>
+
+              <div className="space-y-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
                 {contacts.length === 0 ? (
                   <div className="text-center py-12 text-white/20">
                     <Users className="w-12 h-12 mx-auto mb-4 opacity-10" />
